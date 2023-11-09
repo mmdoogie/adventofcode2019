@@ -47,7 +47,10 @@ class Instr:
                 elif param_mode == 1:
                     params += [program[pc + i]]
                 elif param_mode == 2:
-                    params += [program[program[pc + i] + rb]]
+                    try:
+                        params += [program[program[pc + i] + rb]]
+                    except KeyError:
+                        params += [0]
                 else:
                     assert False, 'Invalid param_mode for src'
             pc += self.param_cnt
@@ -110,6 +113,9 @@ class IntcodeComputer:
     
     def input(self, val):
         self.inp_deque.append(val)
+
+    def queue_inputs(self, val):
+        self.inp_deque.extend(val)
 
     def all_outputs(self):
         items = list(self.out_deque)
