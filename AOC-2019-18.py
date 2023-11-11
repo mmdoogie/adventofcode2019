@@ -37,9 +37,9 @@ def map_region(part2 = None):
         neighbors[(sx, sy)] = sn
 
     pathfind = {}
-    pathfind['@'] = Djikstra(spaces, neighbors, start_pos)
+    pathfind['@'] = Djikstra(neighbors, start_pos)
     for kk, kv in keys.items():
-        pathfind[kk] = Djikstra(spaces, neighbors, kv)
+        pathfind[kk] = Djikstra(neighbors, kv)
 
     pair_dist = {}
     for k1 in list(keys.keys()) + ['@']:

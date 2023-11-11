@@ -65,8 +65,8 @@ for sp in spaces:
     ngh = [n for n in ngh_cand if n in spaces]
     neighbors[sp] = ngh
 
-weights, paths = Djikstra(spaces, neighbors, (0, 0), oxy)
+weights, paths = Djikstra(neighbors, (0, 0), oxy)
 print('Part 1:', weights[oxy])
 
-weights, paths = Djikstra(spaces, neighbors, oxy)
+weights, paths = Djikstra(neighbors, oxy)
 print('Part 2:', max(weights.values()))

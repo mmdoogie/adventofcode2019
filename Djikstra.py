@@ -1,4 +1,4 @@
-def Djikstra(point_set, neighbors_dict, start_point, end_point = None):
+def Djikstra(neighbors_dict, start_point, end_point = None):
     visited = set()
     weights = dict()
     paths = dict()
@@ -10,7 +10,7 @@ def Djikstra(point_set, neighbors_dict, start_point, end_point = None):
     explore = dict()
     explore[curr_point] = 0
 
-    while len(visited) < len(point_set):
+    while True:
         del(explore[curr_point])
         curr_weight = weights[curr_point] + 1
         currPath = paths[curr_point] 

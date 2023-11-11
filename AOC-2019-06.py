@@ -22,8 +22,8 @@ for a, b in pairs:
     else:
         deps[b] = [a]
 
-com_weights, com_paths = Djikstra(objs, deps, 'COM')
+com_weights, com_paths = Djikstra(deps, 'COM')
 print('Part 1:', sum(com_weights.values()))
 
-you_weights, you_paths = Djikstra(objs, deps, 'YOU')
+you_weights, you_paths = Djikstra(deps, 'YOU')
 print('Part 2:', you_weights['SAN'] - 2)
