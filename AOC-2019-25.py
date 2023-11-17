@@ -1,28 +1,18 @@
 import itertools
-from IntcodeComputer import IntcodeComputer
+from IntcodeComputer import IntcodeComputer, IOMode
 
 with open('data/aoc-2019-25.txt') as f:
     dat = [x.strip() for x in f.readlines()]
 
 base_program = [int(x) for x in dat[0].split(',')]
-ic = IntcodeComputer(base_program)
+ic = IntcodeComputer(base_program, io_mode = IOMode.ASCII)
 
 def interactive():
     while True:
         ic.run_partial()
-        print(''.join([chr(x) for x in ic.all_outputs()]))
+        print(ic.all_outputs())
         istr = input()
-        ic.queue_inputs([ord(x) for x in istr] + [10])
-
-def to_ascii(dat):
-    return ''.join([chr(x) for x in dat])
-
-def from_ascii(dat):
-    vals = [ord(x) for x in dat]
-    if vals[-1] != 10:
-        return vals + [10]
-    else:
-        return vals
+        ic.queue_inputs(istr + '\n')
 
 def parse_room(room):
     parse = {}
@@ -64,7 +54,7 @@ long_dirs = {'n': 'north', 's': 'south', 'e': 'east', 'w': 'west'}
 
 def explore():
     ic.run_partial()
-    first_room = parse_room(to_ascii(ic.all_outputs()))
+    first_room = parse_room(ic.all_outputs())
     first_room['pos'] = '*'
     visited.add('*')
     rooms[first_room['name']] = first_room
@@ -78,9 +68,9 @@ def dfs(room, fromdir):
         np = path + d[0]
         if np in visited:
             continue
-        ic.queue_inputs(from_ascii(d))
+        ic.queue_inputs(d + '\n')
         ic.run_partial()
-        o = to_ascii(ic.all_outputs())
+        o = ic.all_outputs()
         parse = parse_room(o)
         parse['pos'] = np
         visited.add(np)
@@ -88,7 +78,7 @@ def dfs(room, fromdir):
         for i in parse['items']:
             if i in trap_items:
                 continue
-            ic.queue_inputs(from_ascii('take ' + i))
+            ic.queue_inputs(f'take {i}\n')
             ic.run_partial()
             ic.all_outputs()
             i_have.add(i)
@@ -96,17 +86,16 @@ def dfs(room, fromdir):
             dfs(parse, d)
     if fromdir is not None:
         retdir = reverse[fromdir]
-        ic.queue_inputs(from_ascii(retdir))
+        ic.queue_inputs(retdir + '\n')
         ic.run_partial()
         ic.all_outputs()
     return path
-
 
 loc = explore()
 assert loc == '*'
 for d in rooms['Security Checkpoint']['pos']:
     if d in long_dirs:
-        ic.queue_inputs(from_ascii(long_dirs[d]))
+        ic.queue_inputs(long_dirs[d] + '\n')
         ic.run_partial()
         ic.all_outputs()
 
@@ -115,18 +104,18 @@ def try_combos():
     for r in range(len(all_items)):
         for combo in itertools.combinations(all_items, r):
             for ci in [c for c in combo if c not in i_have]:
-                ic.queue_inputs(from_ascii('take ' + ci))
+                ic.queue_inputs(f'take {ci}\n')
                 ic.run_partial()
                 o = ic.all_outputs()
                 i_have.add(ci)
             for hi in [h for h in i_have if h not in combo]:
-                ic.queue_inputs(from_ascii('drop ' + hi))
+                ic.queue_inputs(f'drop {hi}\n')
                 ic.run_partial()
                 ic.all_outputs()
                 i_have.remove(hi)
-            ic.queue_inputs(from_ascii('north'))
+            ic.queue_inputs('north\n')
             ic.run_partial()
-            out = to_ascii(ic.all_outputs())
+            out = ic.all_outputs()
             if not 'Security Checkpoint' in out:
                 return out, combo
 

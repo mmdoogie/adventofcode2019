@@ -1,4 +1,4 @@
-from IntcodeComputer import IntcodeComputer, PartialResult
+from IntcodeComputer import IntcodeComputer, PartialResult, IOMode
 from itertools import combinations
 
 with open('data/aoc-2019-17.txt') as f:
@@ -7,7 +7,7 @@ with open('data/aoc-2019-17.txt') as f:
 base_program = [int(x) for x in dat[0].split(',')]
 
 def part1(output = False):
-    ic = IntcodeComputer(base_program)
+    ic = IntcodeComputer(base_program, io_mode = IOMode.ASCII)
     rc = ic.run_partial()
     assert rc == PartialResult.TERMINATED
     out = ic.all_outputs()
@@ -17,31 +17,31 @@ def part1(output = False):
     scaffold = {}
 
     for o in out:
-        if o == 10:
+        if o == '\n':
             x = 0
             y += 1
             if output:
                 print()
             continue
         
-        if o == 35:
+        if o == '#':
             scaffold[(x, y)] = True
 
-        if o == ord('^'):
+        if o == '^':
             start_pt = (x, y)
             start_dir = (0, -1)
-        elif o == ord('v'):
+        elif o == 'v':
             start_pt = (x, y)
             start_dir = (0, 1)
-        elif o == ord('<'):
+        elif o == '<':
             start_pt = (x, y)
             start_dir = (-1, 0)
-        elif o == ord('>'):
+        elif o == '>':
             start_pt = (x, y)
             start_dir = (1, 0)
 
         if output:
-            print(chr(o), end='')
+            print(o, end='')
         x += 1
 
     total = 0
@@ -116,12 +116,6 @@ def find_solution(full_path):
             continue
         return subs, res
 
-def line_to_vals(txt):
-    return [ord(c) for c in txt] + [10]
-
-def vals_to_txt(vals):
-    return ''.join([chr(v) for v in vals]).strip()
-
 def part2(scaffold, start_pt, start_dir, output = False):
     full_path = traverse(scaffold, start_pt, start_dir)
     final_trav = ','.join(full_path)
@@ -132,37 +126,37 @@ def part2(scaffold, start_pt, start_dir, output = False):
 
     p = list(base_program)
     p[0] = 2
-    ic = IntcodeComputer(p)
+    ic = IntcodeComputer(p, io_mode = IOMode.ASCII)
     rc = ic.run_partial()
     assert rc == PartialResult.WAIT_INPUT
 
     if output:
-        print(vals_to_txt(ic.all_outputs()), end=' ')
+        print(ic.all_outputs(), end=' ')
         print(res)
-    ic.queue_inputs(line_to_vals(res))
+    ic.queue_inputs(res + '\n')
 
     for s in subs:
         rc = ic.run_partial()
         assert rc == PartialResult.WAIT_INPUT
         if output:
-            print(vals_to_txt(ic.all_outputs()), end=' ')
+            print(ic.all_outputs(), end=' ')
             print(s)
-        ic.queue_inputs(line_to_vals(s))
+        ic.queue_inputs(s + '\n')
 
     rc = ic.run_partial()
     assert rc == PartialResult.WAIT_INPUT
 
     noline = 'n'
     if output:
-        print(vals_to_txt(ic.all_outputs()), end=' ')
+        print(ic.all_outputs(), end=' ')
         print(noline)
-    ic.queue_inputs(line_to_vals(noline))
+    ic.queue_inputs(noline + '\n')
     rc = ic.run_partial()
     assert rc == PartialResult.TERMINATED
 
-    vals = ic.all_outputs()
+    rv = ic.out_deque.pop()
     if output:
-        print(vals_to_txt(vals))
-    return vals[-1]
+        print(ic.all_outputs(), rv)
+    return rv
 
 print('Part 2:', part2(scaffold, start_pt, start_dir))

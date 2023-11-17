@@ -13,6 +13,10 @@ class ResultDest(Enum):
     PC = 3
     RB = 4
 
+class IOMode(Enum):
+    NUMERIC = 0
+    ASCII = 1
+
 EvalResult = namedtuple('EvalResult', ['mem_change', 'output', 'new_pc', 'new_rb'])
 
 class Instr:
@@ -104,26 +108,45 @@ class PartialResult(Enum):
     WAIT_INPUT = 1
 
 class IntcodeComputer:
-    def __init__(self, program):
+    def __init__(self, program, io_mode = IOMode.NUMERIC):
         self.program = {i: v for i, v in enumerate(program)}
         self.inp_deque = deque()
         self.out_deque = deque()
         self.pc = 0
         self.rb = 0
-    
-    def input(self, val):
+        self.io_mode = io_mode
+
+    def raw_input(self, val):
         self.inp_deque.append(val)
 
+    def input(self, val):
+        if self.io_mode == IOMode.NUMERIC:
+            self.inp_deque.append(val)
+        else:
+            self.inp_deque.append(ord(val))
+
     def queue_inputs(self, val):
-        self.inp_deque.extend(val)
+        if self.io_mode == IOMode.NUMERIC:
+            self.inp_deque.extend(val)
+        else:
+            self.inp_deque.extend([ord(v) for v in val])
 
     def all_outputs(self):
         items = list(self.out_deque)
         self.out_deque.clear()
-        return items
+        if self.io_mode == IOMode.NUMERIC:
+            return items
+        else:
+            return ''.join([chr(i) for i in items])
+
+    def raw_output(self):
+        return self.out_deque.popleft()
 
     def output(self):
-        return self.out_deque.popleft()
+        if self.io_mode == IOMode.NUMERIC:
+            return self.out_deque.popleft()
+        else:
+            return chr(self.out_deque.popleft())
 
     def run_partial(self):
         while self.pc is not None:
